@@ -57,10 +57,6 @@ class Widget(QWidget):
         print(path)
         for i in self.sc.axes:
             i.clear()
-        #self.sc.axes.clear()
-        if '.csv' != path[-4:]:
-            print('bitte eine csv Datei übergeben!')
-            return
 
         file = open(path)
         startData = 0
@@ -72,6 +68,7 @@ class Widget(QWidget):
             if line != '\n':
                 title += line
                 startData += 1
+        file.close()
         dataFrame = pandas.read_csv(path, header=startData)
         timeLine = [(datetime.datetime.strptime(time, '%H:%M:%S.%f') - 
                  datetime.datetime.strptime(dataFrame['Time'][0], 
@@ -130,13 +127,8 @@ class Widget(QWidget):
         self.sc.axes[1].legend(loc='center left', bbox_to_anchor=(1, 0.5))
         self.sc.axes[2].legend(loc='center left', bbox_to_anchor=(1, 0.5))
         self.sc.axes[2].set_xlabel('Zeit in Sekunden')
-        
-        #fig.suptitle(title)
-        #plt.tight_layout()
 
         self.sc.draw()
-        #self.sc.flush_events()
-        #self.show()
 
 
     
