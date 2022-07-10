@@ -18,6 +18,7 @@ matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 
+
 class MplCanvas(FigureCanvasQTAgg):
 
     def __init__(self, parent=None, width=5, height=4, dpi=100):
@@ -70,25 +71,29 @@ class Widget(QWidget):
                 startData += 1
         file.close()
         dataFrame = pandas.read_csv(path, header=startData)
-        timeLine = [(datetime.datetime.strptime(time, '%H:%M:%S.%f') - 
-                 datetime.datetime.strptime(dataFrame['Time'][0], 
-                 '%H:%M:%S.%f'))/datetime.timedelta(seconds=1) for time in dataFrame['Time'] ]
+        timeLine = [(datetime.datetime.strptime(time, '%H:%M:%S.%f') -
+                    datetime.datetime.strptime(dataFrame['Time'][0],
+                    '%H:%M:%S.%f'))/datetime.timedelta(seconds=1)
+                    for time in dataFrame['Time']]
         dataFrame['Time'] = timeLine
         dataFrame.set_index('Time', inplace=True)
         print(dataFrame)
-        
+        listDruck = []
         for key in dataFrame.keys():
             if key != 'Unnamed: 0' and key != 'Time':
                 if '°C' in key:
-                    self.sc.axes[0].plot(dataFrame[key], linewidth=1.5, label=key)
+                    self.sc.axes[0].plot(dataFrame[key],
+                                         linewidth=1.5,
+                                         label=key)
                     self.sc.axes[0].set(ylabel='°C')
                 if 'Bar' in key:
+                    listDruck.append(key)
                     self.sc.axes[1].plot(dataFrame[key], linewidth=1.5, label=key)
                     self.sc.axes[1].set(ylabel='Bar')
                 if 'cm' in key:
                     self.sc.axes[2].plot(dataFrame[key], linewidth=1.5, label=key)
                     self.sc.axes[2].set(ylabel='cm')
-        
+        self.sc.axes[1].plot(abs(dataFrame[listDruck[0]]-dataFrame[listDruck[1]]), linewidth=1.0, label="|P1-P2|")
         if self.findMinButton.isChecked():
             # Bestimmung der lokalen Minima 
             dataFrame['min'] = dataFrame.iloc[argrelextrema(dataFrame['Pos/[cm]'].values, np.less_equal,
@@ -127,7 +132,7 @@ class Widget(QWidget):
         self.sc.axes[1].legend(loc='center left', bbox_to_anchor=(1, 0.5))
         self.sc.axes[2].legend(loc='center left', bbox_to_anchor=(1, 0.5))
         self.sc.axes[2].set_xlabel('Zeit in Sekunden')
-
+        self.sc.axes[0].set_title(path)
         self.sc.draw()
 
 
